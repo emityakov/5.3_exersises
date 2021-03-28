@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DefaultVideoAppExample</string>
+    <string name="get_video">Get video</string>
+</resources>

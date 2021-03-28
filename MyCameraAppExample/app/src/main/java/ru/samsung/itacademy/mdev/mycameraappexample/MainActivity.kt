@@ -35,19 +35,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // hide the action bar
+        //скрываем action bar
         supportActionBar?.hide()
 
-        // Check camera permissions if all permission granted
-        // start camera else ask for the permission
+        // Проверяем разрешения камеры, если все разрешения предоставлены,
+        // запускаем камеру, иначе запрашиваем разрешения
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        // set on click listener for the button of capture photo
-        // it calls a method which is implemented below
+        // устанавливаем слушателя на кнопку
         findViewById<Button>(R.id.camera_capture_button).setOnClickListener {
             takePhoto()
         }
@@ -56,22 +55,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-        // Get a stable reference of the
-        // modifiable image capture use case
+
         val imageCapture = imageCapture ?: return
 
-        // Create time-stamped output file to hold the image
+        // файл с меткой времени для хранения изображения
         val photoFile = File(
                 outputDirectory,
                 SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
         )
 
-        // Create output options object which contains file + metadata
+        // объект параметров вывода, который содержит файл + метаданные
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        // Set up image capture listener,
-        // which is triggered after photo has
-        // been taken
+        //слушатель захвата изображений, который запускается после того, как фотография была сделана
         imageCapture.takePicture(
                 outputOptions,
                 ContextCompat.getMainExecutor(this),
@@ -83,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = Uri.fromFile(photoFile)
 
-                        // set the saved uri to the image view
+                        // сохраненный uri для просмотра изображения
                         findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
                         findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
 
@@ -99,10 +95,10 @@ class MainActivity : AppCompatActivity() {
 
         cameraProviderFuture.addListener(Runnable {
 
-            // Used to bind the lifecycle of cameras to the lifecycle owner
+            // привязка жизненного цикла камеры
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            // Preview
+            // превью
             val preview = Preview.Builder()
                     .build()
                     .also {
@@ -111,14 +107,14 @@ class MainActivity : AppCompatActivity() {
 
             imageCapture = ImageCapture.Builder().build()
 
-            // Select back camera as a default
+            // установка камеры устройства по умолчанию
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
-                // Unbind use cases before rebinding
+                // отключение вариантов использования камеры перед повторной привязкой
                 cameraProvider.unbindAll()
 
-                // Bind use cases to camera
+                // выбор варианта использования камеры
                 cameraProvider.bindToLifecycle(
                         this, cameraSelector, preview, imageCapture
                 )
@@ -134,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    // creates a folder inside internal storage
+    // создание папки для сохранения изображения
     private fun getOutputDirectory(): File {
         val mediaDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             externalMediaDirs.firstOrNull()?.let {
@@ -147,19 +143,16 @@ class MainActivity : AppCompatActivity() {
             mediaDir else filesDir
     }
 
-    // checks the camera permission
+    // проверка доступа
     override fun onRequestPermissionsResult(
             requestCode: Int, permissions: Array<String>, grantResults:
             IntArray
     ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            // If all permissions granted , then start Camera
+
             if (allPermissionsGranted()) {
                 startCamera()
             } else {
-                // If permissions are not granted,
-                // present a toast to notify the user that
-                // the permissions were not granted.
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
                 finish()
             }
